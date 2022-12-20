@@ -1,12 +1,15 @@
 package features.parser.dependency_injection;
 
 import core.errors.exceptions.SomethingWentWrongException;
-import core.errors.failures.SomethingWentWrongFailure;
 import core.mappers.EntityMapper;
 import core.mappers.JsonMapper;
+import core.network.InternetConnectionChecker;
+import core.network.concretes.CheckInternetConnectionByGoogle;
 import core.observers.Observable;
 import core.observers.Observer;
+import features.parser.data.datasources.JokeLocalDatasource;
 import features.parser.data.datasources.JokeRemoteDatasource;
+import features.parser.data.datasources.local_datasources.JokeLocalDatasourceFromPrefs;
 import features.parser.data.datasources.remote_datasources.JokeRemoteDatasourceFromRestApi;
 import features.parser.data.mappers.entities.FlagsEntityMapper;
 import features.parser.data.mappers.entities.RequestEntityMapper;
@@ -32,6 +35,7 @@ import org.json.JSONObject;
 import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 public final class DependencyInjectionContainer {
     private static DependencyInjectionContainer di;
@@ -99,11 +103,22 @@ public final class DependencyInjectionContainer {
                         HttpClient.newHttpClient(),
                         requestJsonMapper
                 );
+        final JokeLocalDatasource localDatasource =
+                new JokeLocalDatasourceFromPrefs(
+                        Preferences.userRoot(),
+                        requestJsonMapper
+                );
         register(remoteDatasource);
+        register(localDatasource);
+        final InternetConnectionChecker internetChecker =
+                new CheckInternetConnectionByGoogle();
+        register(internetChecker);
         final JokeRepositoryInterface jokeRepository =
                 new JokeRepository(
                         remoteDatasource,
-                        requestEntityMapper
+                        localDatasource,
+                        requestEntityMapper,
+                        internetChecker
                 );
         register(jokeRepository);
         final GetSomeJokes getSomeJokes = new GetSomeJokes(

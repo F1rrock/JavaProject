@@ -12,20 +12,21 @@ public class Main {
         DependencyInjectionContainer di =
                 DependencyInjectionContainer.getInstance();
         di.init();
-        GetSomeJokes getSomeJokes;
+        final GetSomeJokes getSomeJokes;
         try {
             getSomeJokes = di.get(GetSomeJokes.class);
         } catch (SomethingWentWrongException e) {
             System.out.println("something went wrong");
             return;
         }
-        Either<Failure, RequestEntity> jokesOrFailure =
+        final Either<Failure, RequestEntity> jokesOrFailure =
                 getSomeJokes.execute(new NoParams());
         final Object folder = jokesOrFailure.get();
         if (folder instanceof Failure) {
             final String failureType = folder.getClass().getSimpleName();
             final String message = switch (failureType) {
                 case "ServerFailure" -> "something with server :(";
+                case "CacheFailure" -> "there's nothing, please check your internet connection";
                 case "MapperFailure", "SomethingWentWrongFailure" -> "something went wrong :(";
                 default -> "unhandled failure :((";
             };
@@ -38,7 +39,7 @@ public class Main {
                 System.out.println("type: " + joke.type());
                 System.out.println("joke: " + joke.text());
 
-                FlagsEntity flags = joke.flags();
+                final FlagsEntity flags = joke.flags();
                 System.out.println("nsfw: " + flags.nsfw());
                 System.out.println("religious: " + flags.religious());
                 System.out.println("political: " + flags.political());
