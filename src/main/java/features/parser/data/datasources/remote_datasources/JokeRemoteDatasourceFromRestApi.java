@@ -27,8 +27,8 @@ public final class JokeRemoteDatasourceFromRestApi implements JokeRemoteDatasour
         final HttpResponse<String> response = client.send(request,
                 HttpResponse.BodyHandlers.ofString());
         var jsonResponse = new JSONObject(response.body());
-        if ((response.statusCode() == 200) ||
-                (jsonResponse.getBoolean("error"))) {
+        if ((response.statusCode() == 200) &&
+                !(jsonResponse.getBoolean("error"))) {
             return requestMapper.fromJson(jsonResponse);
         } else {
             throw new ServerException();
