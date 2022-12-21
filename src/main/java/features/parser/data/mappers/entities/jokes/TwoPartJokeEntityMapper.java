@@ -6,9 +6,9 @@ import features.parser.data.models.FlagsModel;
 import features.parser.data.models.TwoPartJokeModel;
 import features.parser.domain.entities.FlagsEntity;
 import features.parser.domain.entities.JokeEntity;
-import features.parser.domain.mappers.entities.JokeEntityMapper;
+import features.parser.domain.mappers.entities.JokeEntityMapperInterface;
 
-public final class TwoPartJokeEntityMapper implements JokeEntityMapper, Observable<JokeEntityMapper, JokeEntity> {
+public final class TwoPartJokeEntityMapper implements JokeEntityMapperInterface, Observable<JokeEntityMapperInterface, JokeEntity> {
     private final EntityMapper<FlagsEntity, FlagsModel> flagsMapper;
 
     public TwoPartJokeEntityMapper(EntityMapper<FlagsEntity, FlagsModel> flagsMapper) {
@@ -45,7 +45,7 @@ public final class TwoPartJokeEntityMapper implements JokeEntityMapper, Observab
     }
 
     @Override
-    public JokeEntityMapper accessOnFrom(JokeEntity entity) {
+    public JokeEntityMapperInterface accessOnFrom(JokeEntity entity) {
         if (entity.type().equals("twopart")) {
             return this;
         } else {
@@ -54,7 +54,7 @@ public final class TwoPartJokeEntityMapper implements JokeEntityMapper, Observab
     }
 
     @Override
-    public JokeEntityMapper accessOnTo(Object model) {
+    public JokeEntityMapperInterface accessOnTo(Object model) {
         if (model instanceof TwoPartJokeModel) {
             return this;
         } else {

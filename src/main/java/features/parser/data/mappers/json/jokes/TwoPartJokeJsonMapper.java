@@ -4,10 +4,10 @@ import core.mappers.JsonMapper;
 import core.observers.Observable;
 import features.parser.data.models.FlagsModel;
 import features.parser.data.models.TwoPartJokeModel;
-import features.parser.domain.mappers.json.JokeJsonMapper;
+import features.parser.domain.mappers.json.JokeJsonMapperInterface;
 import org.json.JSONObject;
 
-public final class TwoPartJokeJsonMapper implements JokeJsonMapper, Observable<JokeJsonMapper, JSONObject> {
+public final class TwoPartJokeJsonMapper implements JokeJsonMapperInterface, Observable<JokeJsonMapperInterface, JSONObject> {
     private final JsonMapper<FlagsModel> flagsMapper;
 
     public TwoPartJokeJsonMapper(JsonMapper<FlagsModel> flagsMapper) {
@@ -44,7 +44,7 @@ public final class TwoPartJokeJsonMapper implements JokeJsonMapper, Observable<J
     }
 
     @Override
-    public JokeJsonMapper accessOnFrom(JSONObject json) {
+    public JokeJsonMapperInterface accessOnFrom(JSONObject json) {
         if (json.getString("type").equals("twopart")) {
             return this;
         } else {
@@ -53,7 +53,7 @@ public final class TwoPartJokeJsonMapper implements JokeJsonMapper, Observable<J
     }
 
     @Override
-    public JokeJsonMapper accessOnTo(Object param) {
+    public JokeJsonMapperInterface accessOnTo(Object param) {
         if (param instanceof TwoPartJokeModel) {
             return this;
         } else {

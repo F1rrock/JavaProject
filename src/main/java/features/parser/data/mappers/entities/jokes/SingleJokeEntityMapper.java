@@ -6,9 +6,9 @@ import features.parser.data.models.FlagsModel;
 import features.parser.data.models.SingleJokeModel;
 import features.parser.domain.entities.FlagsEntity;
 import features.parser.domain.entities.JokeEntity;
-import features.parser.domain.mappers.entities.JokeEntityMapper;
+import features.parser.domain.mappers.entities.JokeEntityMapperInterface;
 
-public final class SingleJokeEntityMapper implements JokeEntityMapper, Observable<JokeEntityMapper, JokeEntity> {
+public final class SingleJokeEntityMapper implements JokeEntityMapperInterface, Observable<JokeEntityMapperInterface, JokeEntity> {
     private final EntityMapper<FlagsEntity, FlagsModel> flagsMapper;
 
     public SingleJokeEntityMapper(EntityMapper<FlagsEntity, FlagsModel> flagsMapper) {
@@ -47,7 +47,7 @@ public final class SingleJokeEntityMapper implements JokeEntityMapper, Observabl
     }
 
     @Override
-    public JokeEntityMapper accessOnFrom(JokeEntity entity) {
+    public JokeEntityMapperInterface accessOnFrom(JokeEntity entity) {
         if (entity.type().equals("single")) {
             return this;
         } else {
@@ -56,7 +56,7 @@ public final class SingleJokeEntityMapper implements JokeEntityMapper, Observabl
     }
 
     @Override
-    public JokeEntityMapper accessOnTo(Object model) {
+    public JokeEntityMapperInterface accessOnTo(Object model) {
         if (model instanceof SingleJokeModel) {
             return this;
         } else {

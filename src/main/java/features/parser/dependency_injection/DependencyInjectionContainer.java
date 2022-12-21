@@ -12,10 +12,12 @@ import features.parser.data.datasources.JokeRemoteDatasource;
 import features.parser.data.datasources.local_datasources.JokeLocalDatasourceFromPrefs;
 import features.parser.data.datasources.remote_datasources.JokeRemoteDatasourceFromRestApi;
 import features.parser.data.mappers.entities.FlagsEntityMapper;
+import features.parser.data.mappers.entities.JokeEntityMapper;
 import features.parser.data.mappers.entities.RequestEntityMapper;
 import features.parser.data.mappers.entities.jokes.SingleJokeEntityMapper;
 import features.parser.data.mappers.entities.jokes.TwoPartJokeEntityMapper;
 import features.parser.data.mappers.json.FlagsJsonMapper;
+import features.parser.data.mappers.json.JokeJsonMapper;
 import features.parser.data.mappers.json.RequestJsonMapper;
 import features.parser.data.mappers.json.jokes.SingleJokeJsonMapper;
 import features.parser.data.mappers.json.jokes.TwoPartJokeJsonMapper;
@@ -26,8 +28,8 @@ import features.parser.data.repositories.JokeRepository;
 import features.parser.domain.entities.FlagsEntity;
 import features.parser.domain.entities.JokeEntity;
 import features.parser.domain.entities.RequestEntity;
-import features.parser.domain.mappers.entities.JokeEntityMapper;
-import features.parser.domain.mappers.json.JokeJsonMapper;
+import features.parser.domain.mappers.entities.JokeEntityMapperInterface;
+import features.parser.domain.mappers.json.JokeJsonMapperInterface;
 import features.parser.domain.repositories.JokeRepositoryInterface;
 import features.parser.domain.use_cases.GetSomeJokes;
 import org.json.JSONObject;
@@ -64,38 +66,44 @@ public final class DependencyInjectionContainer {
         throw new SomethingWentWrongException();
     }
 
-    private EntityMapper<RequestEntity, RequestModel> setUpEntityMappers() {
+    private JokeEntityMapperInterface setUpJokeEntityMappers() {
         final EntityMapper<FlagsEntity, FlagsModel> flagsMapper =
                 new FlagsEntityMapper();
-        final Observable<JokeEntityMapper, JokeEntity> singleJokeMapper =
+        final Observable<JokeEntityMapperInterface, JokeEntity> singleJokeMapper =
                 new SingleJokeEntityMapper(flagsMapper);
-        final Observable<JokeEntityMapper, JokeEntity> twoPartJokeMapper =
+        final Observable<JokeEntityMapperInterface, JokeEntity> twoPartJokeMapper =
                 new TwoPartJokeEntityMapper(flagsMapper);
-        final Observer<JokeEntityMapper, JokeEntity> jokeObserver =
+        final Observer<JokeEntityMapperInterface, JokeEntity> jokeObserver =
                 new JokeObserver<>();
         jokeObserver.add(singleJokeMapper);
         jokeObserver.add(twoPartJokeMapper);
-        return new RequestEntityMapper(jokeObserver);
+        return new JokeEntityMapper(jokeObserver);
     }
 
-    private JsonMapper<RequestModel> setUpJsonMappers() {
+    private JokeJsonMapperInterface setUpJokeJsonMappers() {
         JsonMapper<FlagsModel> flagsJsonMapper = new FlagsJsonMapper();
-        Observable<JokeJsonMapper, JSONObject> singleJokeJsonMapper =
+        Observable<JokeJsonMapperInterface, JSONObject> singleJokeJsonMapper =
                 new SingleJokeJsonMapper(flagsJsonMapper);
-        Observable<JokeJsonMapper, JSONObject> twoPartJokeJsonMapper =
+        Observable<JokeJsonMapperInterface, JSONObject> twoPartJokeJsonMapper =
                 new TwoPartJokeJsonMapper(flagsJsonMapper);
-        Observer<JokeJsonMapper, JSONObject> jokeJsonObserver =
+        Observer<JokeJsonMapperInterface, JSONObject> jokeJsonObserver =
                 new JokeObserver<>();
         jokeJsonObserver.add(singleJokeJsonMapper);
         jokeJsonObserver.add(twoPartJokeJsonMapper);
-        return new RequestJsonMapper(jokeJsonObserver);
+        return new JokeJsonMapper(jokeJsonObserver);
     }
 
     public void init() {
+        final JokeEntityMapperInterface jokeEntityMapper =
+                setUpJokeEntityMappers();
+        register(jokeEntityMapper);
         final EntityMapper<RequestEntity, RequestModel> requestEntityMapper =
-                setUpEntityMappers();
+                new RequestEntityMapper(jokeEntityMapper);
+        final JokeJsonMapperInterface jokeJsonMapper =
+                setUpJokeJsonMappers();
+        register(jokeJsonMapper);
         final JsonMapper<RequestModel> requestJsonMapper =
-                setUpJsonMappers();
+                new RequestJsonMapper(jokeJsonMapper);
         register(requestEntityMapper);
         register(requestJsonMapper);
         final JokeRemoteDatasource remoteDatasource =
