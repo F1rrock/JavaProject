@@ -10,7 +10,9 @@ import core.types.either.Left;
 import core.types.either.Right;
 import features.parser.data.datasources.JokeLocalDatasource;
 import features.parser.data.datasources.JokeRemoteDatasource;
+import features.parser.data.models.JokePostModel;
 import features.parser.data.models.RequestModel;
+import features.parser.domain.entities.JokeEntity;
 import features.parser.domain.entities.RequestEntity;
 import features.parser.domain.repositories.JokeRepositoryInterface;
 
@@ -18,12 +20,14 @@ public final class JokeRepository implements JokeRepositoryInterface {
     private final JokeRemoteDatasource remoteDatasource;
     private final JokeLocalDatasource localDatasource;
     private final EntityMapper<RequestEntity, RequestModel> requestMapper;
+    private final EntityMapper<JokeEntity, JokePostModel> jokePostMapper;
     private final InternetConnectionChecker internetChecker;
 
-    public JokeRepository(JokeRemoteDatasource remoteDatasource, JokeLocalDatasource localDatasource, EntityMapper<RequestEntity, RequestModel> requestMapper, InternetConnectionChecker internetChecker) {
+    public JokeRepository(JokeRemoteDatasource remoteDatasource, JokeLocalDatasource localDatasource, EntityMapper<RequestEntity, RequestModel> requestMapper, EntityMapper<JokeEntity, JokePostModel> jokePostMapper, InternetConnectionChecker internetChecker) {
         this.remoteDatasource = remoteDatasource;
         this.localDatasource = localDatasource;
         this.requestMapper = requestMapper;
+        this.jokePostMapper = jokePostMapper;
         this.internetChecker = internetChecker;
     }
 
@@ -58,6 +62,31 @@ public final class JokeRepository implements JokeRepositoryInterface {
                 }
                 return new Left<>(failure);
             }
+        }
+    }
+
+    @Override
+    public Either<Failure, Void> addJoke(JokeEntity entity) {
+        final JokePostModel jokePostModel = jokePostMapper.fromEntity(entity);
+        if (internetChecker.hasConnection()) {
+            try {
+                remoteDatasource.addJoke(jokePostModel);
+                return new Right<>(null);
+            } catch (Exception exception) {
+                final Failure failure;
+                if (exception instanceof ServerException) {
+                    failure = new ServerFailure();
+                } else if (exception instanceof NullPointerException) {
+                    failure = new MapperFailure();
+                } else {
+                    failure = new SomethingWentWrongFailure();
+                }
+                return new Left<>(failure);
+            }
+        } else {
+            return new Left<>(
+                    new SomethingWentWrongFailure()
+            );
         }
     }
 }

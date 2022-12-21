@@ -4,7 +4,7 @@ import core.observers.Observer;
 import features.parser.domain.mappers.json.JokeJsonMapperInterface;
 import org.json.JSONObject;
 
-public class JokeJsonMapper implements JokeJsonMapperInterface {
+public final class JokeJsonMapper implements JokeJsonMapperInterface {
     private final Observer<JokeJsonMapperInterface, JSONObject> observer;
 
     public JokeJsonMapper(Observer<JokeJsonMapperInterface, JSONObject> observer) {

@@ -1,10 +1,11 @@
 package features.parser.data.mappers.entities;
 
 import core.observers.Observer;
+import features.parser.data.models.JokePostModel;
 import features.parser.domain.entities.JokeEntity;
 import features.parser.domain.mappers.entities.JokeEntityMapperInterface;
 
-public class JokeEntityMapper implements JokeEntityMapperInterface {
+public final class JokeEntityMapper implements JokeEntityMapperInterface {
     private final Observer<JokeEntityMapperInterface, JokeEntity> observer;
 
     public JokeEntityMapper(Observer<JokeEntityMapperInterface, JokeEntity> observer) {

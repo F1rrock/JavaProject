@@ -16,12 +16,15 @@ import features.parser.data.mappers.entities.JokeEntityMapper;
 import features.parser.data.mappers.entities.RequestEntityMapper;
 import features.parser.data.mappers.entities.jokes.SingleJokeEntityMapper;
 import features.parser.data.mappers.entities.jokes.TwoPartJokeEntityMapper;
+import features.parser.data.mappers.entities.post.JokePostEntityMapper;
 import features.parser.data.mappers.json.FlagsJsonMapper;
 import features.parser.data.mappers.json.JokeJsonMapper;
 import features.parser.data.mappers.json.RequestJsonMapper;
 import features.parser.data.mappers.json.jokes.SingleJokeJsonMapper;
 import features.parser.data.mappers.json.jokes.TwoPartJokeJsonMapper;
+import features.parser.data.mappers.json.post.JokePostJsonMapper;
 import features.parser.data.models.FlagsModel;
+import features.parser.data.models.JokePostModel;
 import features.parser.data.models.RequestModel;
 import features.parser.data.observers.JokeObserver;
 import features.parser.data.repositories.JokeRepository;
@@ -31,7 +34,9 @@ import features.parser.domain.entities.RequestEntity;
 import features.parser.domain.mappers.entities.JokeEntityMapperInterface;
 import features.parser.domain.mappers.json.JokeJsonMapperInterface;
 import features.parser.domain.repositories.JokeRepositoryInterface;
+import features.parser.domain.use_cases.AddCustomJoke;
 import features.parser.domain.use_cases.GetSomeJokes;
+import features.parser.presentation.events.GetSomeJokesEvent;
 import org.json.JSONObject;
 
 import java.net.http.HttpClient;
@@ -106,10 +111,17 @@ public final class DependencyInjectionContainer {
                 new RequestJsonMapper(jokeJsonMapper);
         register(requestEntityMapper);
         register(requestJsonMapper);
+        final EntityMapper<JokeEntity, JokePostModel> jokePostEntityMapper =
+                new JokePostEntityMapper(jokeEntityMapper);
+        final JsonMapper<JokePostModel> jokePostJsonMapper =
+                new JokePostJsonMapper(jokeJsonMapper);
+        register(jokePostEntityMapper);
+        register(jokePostJsonMapper);
         final JokeRemoteDatasource remoteDatasource =
                 new JokeRemoteDatasourceFromRestApi(
                         HttpClient.newHttpClient(),
-                        requestJsonMapper
+                        requestJsonMapper,
+                        jokePostJsonMapper
                 );
         final JokeLocalDatasource localDatasource =
                 new JokeLocalDatasourceFromPrefs(
@@ -126,12 +138,18 @@ public final class DependencyInjectionContainer {
                         remoteDatasource,
                         localDatasource,
                         requestEntityMapper,
+                        jokePostEntityMapper,
                         internetChecker
                 );
         register(jokeRepository);
+
         final GetSomeJokes getSomeJokes = new GetSomeJokes(
                 jokeRepository
         );
         register(getSomeJokes);
+        final AddCustomJoke addCustomJoke = new AddCustomJoke(
+                jokeRepository
+        );
+        register(addCustomJoke);
     }
 }

@@ -5,7 +5,7 @@ import core.types.either.Either;
 import core.use_cases.UseCase;
 import features.parser.domain.entities.RequestEntity;
 import features.parser.domain.repositories.JokeRepositoryInterface;
-import features.parser.domain.use_cases.params.NoParams;
+import core.params.NoParams;
 
 public final class GetSomeJokes implements UseCase<RequestEntity, NoParams> {
     private final JokeRepositoryInterface repository;
